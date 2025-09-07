@@ -492,7 +492,7 @@ export interface CreateFounderProfileData {
   website?: string;
 }
 
-export interface UpdateFounderProfileData extends Partial<CreateFounderProfileData> {}
+export type UpdateFounderProfileData = Partial<CreateFounderProfileData>;
 
 // Search and Filter Types
 export interface SearchFilters {
