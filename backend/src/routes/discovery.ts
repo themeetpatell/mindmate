@@ -132,7 +132,7 @@ router.post('/profiles', (req: Request, res: Response) => {
 
       if (filters.locations?.length) {
         filteredProfiles = filteredProfiles.filter(profile =>
-          filters.locations.some(loc => 
+          filters.locations.some((loc: string) => 
             profile.founder.location.toLowerCase().includes(loc.toLowerCase())
           )
         );

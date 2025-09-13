@@ -4,10 +4,10 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: startupmatch-postgres
+    container_name: mindmate-postgres
     environment:
-      POSTGRES_DB: startupmatch_prod
-      POSTGRES_USER: startupmatch
+      POSTGRES_DB: mindmate_prod
+      POSTGRES_USER: mindmate_user
       POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password_123}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     volumes:
@@ -16,10 +16,10 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U startupmatch -d startupmatch_prod"]
+      test: ["CMD-SHELL", "pg_isready -U mindmate_user -d mindmate_prod"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -27,14 +27,14 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: startupmatch-redis
+    container_name: mindmate-redis
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password_123}
     volumes:
       - redis_data:/data
     ports:
       - "6379:6379"
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
@@ -45,19 +45,19 @@ services:
   # Elasticsearch
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-    container_name: startupmatch-elasticsearch
+    container_name: mindmate-elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - cluster.name=startupmatch-cluster
-      - node.name=startupmatch-node
+      - cluster.name=mindmate-cluster
+      - node.name=mindmate-node
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
@@ -70,15 +70,15 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: startupmatch-backend
+    container_name: mindmate-backend
     environment:
       - NODE_ENV=production
       - PORT=5000
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=startupmatch
+      - DB_USER=mindmate_user
       - DB_PASSWORD=${DB_PASSWORD:-secure_password_123}
-      - DB_NAME=startupmatch_prod
+      - DB_NAME=mindmate_prod
       - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password_123}@redis:6379
       - ELASTICSEARCH_NODE=http://elasticsearch:9200
       - JWT_SECRET=${JWT_SECRET:-your_super_secret_jwt_key_here}
@@ -93,10 +93,10 @@ services:
       elasticsearch:
         condition: service_healthy
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -106,24 +106,24 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
-    container_name: startupmatch-frontend
+    container_name: mindmate-frontend
     environment:
-      - REACT_APP_API_URL=http://localhost:5000
-      - REACT_APP_SOCKET_URL=http://localhost:5000
+      - VITE_API_URL=http://localhost:5000
+      - VITE_SOCKET_URL=http://localhost:5000
     ports:
       - "3000:80"
     depends_on:
       - backend
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
 
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: startupmatch-nginx
+    container_name: mindmate-nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/logs:/var/log/nginx
     ports:
@@ -133,13 +133,13 @@ services:
       - frontend
       - backend
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
 
   # Monitoring - Prometheus
   prometheus:
     image: prom/prometheus:latest
-    container_name: startupmatch-prometheus
+    container_name: mindmate-prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -153,7 +153,7 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
 
   # Monitoring - Grafana
@@ -171,7 +171,7 @@ services:
     depends_on:
       - prometheus
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
 
   # Log Aggregation - ELK Stack
@@ -184,7 +184,7 @@ services:
     ports:
       - "5044:5044"
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
 
   # Message Queue - RabbitMQ
@@ -200,7 +200,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     networks:
-      - startupmatch-network
+      - mindmate-network
     restart: unless-stopped
 
 volumes:
@@ -218,7 +218,7 @@ volumes:
     driver: local
 
 networks:
-  startupmatch-network:
+  mindmate-network:
     driver: bridge
     ipam:
       config:

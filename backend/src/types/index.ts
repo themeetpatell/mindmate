@@ -1,5 +1,5 @@
 // Re-export frontend types
-export * from '../../../src/types/index';
+export * from './frontend';
 
 // Backend-specific types
 export interface DatabaseConfig {
@@ -152,7 +152,7 @@ export interface ValidationError {
 // Service Types
 export interface MatchingService {
   calculateCompatibility(founderId: string, matchId: string): Promise<CompatibilityScoreModel>;
-  getDailyMatches(founderId: string, limit?: number): Promise<DiscoveryProfile[]>;
+  getDailyMatches(founderId: string, limit?: number): Promise<any[]>;
   getMutualConnections(founderId: string, matchId: string): Promise<string[]>;
   generateIntroductionSuggestions(founderId: string, matchId: string): Promise<string[]>;
 }

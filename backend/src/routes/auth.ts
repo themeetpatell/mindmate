@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 
@@ -9,7 +11,7 @@ const users = [
   {
     id: '1',
     email: 'founder@example.com',
-    password: 'password123', // In real app, this would be hashed
+    password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/4.8.8.8', // Hashed 'password123'
     firstName: 'John',
     lastName: 'Doe',
     isVerified: true,
@@ -24,7 +26,7 @@ router.post('/register', [
   body('password').isLength({ min: 6 }),
   body('firstName').trim().notEmpty(),
   body('lastName').trim().notEmpty()
-], (req: Request, res: Response) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -46,11 +48,15 @@ router.post('/register', [
       });
     }
 
-    // Create new user (in real app, hash password)
+    // Hash password
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new user
     const newUser = {
       id: (users.length + 1).toString(),
       email,
-      password, // In real app, hash this
+      password: hashedPassword,
       firstName,
       lastName,
       isVerified: false,
@@ -60,11 +66,23 @@ router.post('/register', [
 
     users.push(newUser);
 
-    // In real app, generate JWT tokens
-    const accessToken = 'mock-access-token';
-    const refreshToken = 'mock-refresh-token';
+    // Generate JWT tokens
+    const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key';
+    
+    const accessToken = jwt.sign(
+      { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName },
+      jwtSecret,
+      { expiresIn: '15m' }
+    );
+    
+    const refreshToken = jwt.sign(
+      { id: newUser.id, email: newUser.email },
+      jwtRefreshSecret,
+      { expiresIn: '7d' }
+    );
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
@@ -83,7 +101,7 @@ router.post('/register', [
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
@@ -94,7 +112,7 @@ router.post('/register', [
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty()
-], (req: Request, res: Response) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -108,7 +126,7 @@ router.post('/login', [
     const { email, password } = req.body;
 
     // Find user
-    const user = users.find(u => u.email === email && u.password === password);
+    const user = users.find(u => u.email === email);
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -116,11 +134,32 @@ router.post('/login', [
       });
     }
 
-    // In real app, generate JWT tokens
-    const accessToken = 'mock-access-token';
-    const refreshToken = 'mock-refresh-token';
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
 
-    res.json({
+    // Generate JWT tokens
+    const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
+    const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key';
+    
+    const accessToken = jwt.sign(
+      { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+      jwtSecret,
+      { expiresIn: '15m' }
+    );
+    
+    const refreshToken = jwt.sign(
+      { id: user.id, email: user.email },
+      jwtRefreshSecret,
+      { expiresIn: '7d' }
+    );
+
+    return res.json({
       success: true,
       message: 'Login successful',
       data: {
@@ -139,7 +178,7 @@ router.post('/login', [
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal server error'
     });
