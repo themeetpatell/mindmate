@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Eye, 
@@ -10,7 +10,11 @@ import {
   MapPin,
   Heart,
   ArrowRight,
-  XCircle
+  XCircle,
+  Brain,
+  Sparkles,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { loginUser, registerUser, clearError } from '../store/slices/authSlice.js';
 
@@ -20,6 +24,11 @@ const Auth = ({ onAuthSuccess }) => {
   
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -33,6 +42,11 @@ const Auth = ({ onAuthSuccess }) => {
     bio: ''
   });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -115,100 +129,153 @@ const Auth = ({ onAuthSuccess }) => {
       }
       
       // If successful, call the success callback
-      onAuthSuccess();
+      if (onAuthSuccess) {
+        onAuthSuccess();
+      }
     } catch (error) {
       // Error is handled by Redux
       console.error('Authentication error:', error);
     }
   };
 
+  // Handle forgot password
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      setErrors({ email: 'Email is required' });
+      return;
+    }
+    
+    try {
+      // Mock forgot password API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('Password reset link sent to your email!');
+      setShowForgotPassword(false);
+      setResetEmail('');
+    } catch (error) {
+      console.error('Forgot password failed:', error);
+    }
+  };
+
+  // Handle reset password
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!formData.password || !formData.confirmPassword) {
+      setErrors({ password: 'Password is required', confirmPassword: 'Confirm password is required' });
+      return;
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      setErrors({ confirmPassword: 'Passwords do not match' });
+      return;
+    }
+    
+    try {
+      // Mock reset password API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('Password reset successfully! Please sign in with your new password.');
+      setShowResetPassword(false);
+      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+    } catch (error) {
+      console.error('Reset password failed:', error);
+    }
+  };
+
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: 'var(--apple-gray-1)' }}
-    >
-      <div className="w-full max-w-md">
-        {/* Logo */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-float" style={{ animationDelay: '4s' }}></div>
+      </div>
+
+      <div className={`w-full max-w-md relative z-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        {/* Logo Section */}
         <div className="text-center mb-8">
-          <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: 'var(--apple-blue)' }}
-          >
-            <Heart className="w-8 h-8 text-white" />
+          <div className="relative inline-block">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-gradient-to-br from-purple-600 to-pink-600 shadow-lg animate-pulse">
+              <Brain className="w-10 h-10 text-white" />
+            </div>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-bounce">
+              <Sparkles className="w-3 h-3 text-white" />
+            </div>
           </div>
-          <h1 className="apple-text-large-title" style={{ color: 'var(--apple-gray-11)' }}>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
             MindMate
           </h1>
-          <p className="apple-text-body mt-2" style={{ color: 'var(--apple-gray-6)' }}>
+          <p className="text-gray-600 text-lg">
             AI-powered dating for meaningful connections
           </p>
         </div>
 
-        {/* Auth Form */}
-        <div 
-          className="apple-card"
-          style={{ 
-            backgroundColor: 'var(--apple-gray-2)',
-            padding: 'var(--apple-space-8)',
-            borderRadius: 'var(--apple-radius-extra-large)'
-          }}
-        >
-          <div className="flex mb-6">
+        {/* Auth Card */}
+        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+          {/* Card Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-400 to-pink-400"></div>
+          </div>
+
+          {/* Tab Switcher */}
+          <div className="flex bg-gray-100 rounded-2xl p-1 mb-8 relative">
+            <div 
+              className={`absolute top-1 bottom-1 w-1/2 bg-white rounded-xl shadow-md transition-all duration-300 ${
+                isSignUp ? 'translate-x-full' : 'translate-x-0'
+              }`}
+            ></div>
             <button
               onClick={() => setIsSignUp(false)}
-              className={`flex-1 apple-button ${
-                !isSignUp ? 'apple-button-primary' : 'apple-button-secondary'
+              className={`relative z-10 flex-1 py-3 px-4 rounded-xl font-semibold transition-colors duration-200 ${
+                !isSignUp ? 'text-purple-600' : 'text-gray-600'
               }`}
-              style={{
-                padding: 'var(--apple-space-3) var(--apple-space-4)',
-                borderRadius: 'var(--apple-radius-medium)',
-                marginRight: 'var(--apple-space-2)'
-              }}
             >
               Sign In
             </button>
             <button
               onClick={() => setIsSignUp(true)}
-              className={`flex-1 apple-button ${
-                isSignUp ? 'apple-button-primary' : 'apple-button-secondary'
+              className={`relative z-10 flex-1 py-3 px-4 rounded-xl font-semibold transition-colors duration-200 ${
+                isSignUp ? 'text-purple-600' : 'text-gray-600'
               }`}
-              style={{
-                padding: 'var(--apple-space-3) var(--apple-space-4)',
-                borderRadius: 'var(--apple-radius-medium)',
-                marginLeft: 'var(--apple-space-2)'
-              }}
             >
               Sign Up
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
-              <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
-                Email
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
               </label>
-              <div className="relative">
-                <Mail 
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                  style={{ color: 'var(--apple-gray-5)', width: '20px', height: '20px' }}
-                />
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className={`w-5 h-5 transition-colors duration-200 ${
+                    formData.email ? 'text-purple-500' : 'text-gray-400'
+                  }`} />
+                </div>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="apple-input"
-                  style={{
-                    paddingLeft: 'var(--apple-space-10)',
-                    borderColor: errors.email ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                  }}
+                  className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                    errors.email 
+                      ? 'border-red-300 bg-red-50' 
+                      : formData.email 
+                        ? 'border-purple-300 bg-purple-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                  }`}
                   placeholder="Enter your email"
                 />
+                {formData.email && !errors.email && (
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                  </div>
+                )}
               </div>
               {errors.email && (
-                <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                  <XCircle className="w-4 h-4 mr-1" />
+                <p className="text-red-500 text-sm mt-2 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.email}
                 </p>
               )}
@@ -216,41 +283,53 @@ const Auth = ({ onAuthSuccess }) => {
 
             {/* Password */}
             <div>
-              <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Password
               </label>
-              <div className="relative">
-                <Lock 
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                  style={{ color: 'var(--apple-gray-5)', width: '20px', height: '20px' }}
-                />
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className={`w-5 h-5 transition-colors duration-200 ${
+                    formData.password ? 'text-purple-500' : 'text-gray-400'
+                  }`} />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="apple-input"
-                  style={{
-                    paddingLeft: 'var(--apple-space-10)',
-                    paddingRight: 'var(--apple-space-12)',
-                    borderColor: errors.password ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                  }}
+                  className={`w-full pl-12 pr-12 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                    errors.password 
+                      ? 'border-red-300 bg-red-50' 
+                      : formData.password 
+                        ? 'border-purple-300 bg-purple-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                  }`}
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  style={{ color: 'var(--apple-gray-5)' }}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                  <XCircle className="w-4 h-4 mr-1" />
+                <p className="text-red-500 text-sm mt-2 flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
                   {errors.password}
                 </p>
+              )}
+              {!isSignUp && (
+                <div className="text-right mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-sm text-purple-600 hover:text-purple-700 transition-colors duration-200"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
               )}
             </div>
 
@@ -258,61 +337,77 @@ const Auth = ({ onAuthSuccess }) => {
             {isSignUp && (
               <>
                 {/* Name Fields */}
-                <div className="apple-grid apple-grid-2" style={{ gap: 'var(--apple-space-4)' }}>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       First Name
                     </label>
-                    <div className="relative">
-                      <User 
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                        style={{ color: 'var(--apple-gray-5)', width: '20px', height: '20px' }}
-                      />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <User className={`w-5 h-5 transition-colors duration-200 ${
+                          formData.firstName ? 'text-purple-500' : 'text-gray-400'
+                        }`} />
+                      </div>
                       <input
                         type="text"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="apple-input"
-                        style={{
-                          paddingLeft: 'var(--apple-space-10)',
-                          borderColor: errors.firstName ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                        }}
+                        className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                          errors.firstName 
+                            ? 'border-red-300 bg-red-50' 
+                            : formData.firstName 
+                              ? 'border-purple-300 bg-purple-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                        }`}
                         placeholder="First name"
                       />
+                      {formData.firstName && !errors.firstName && (
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        </div>
+                      )}
                     </div>
                     {errors.firstName && (
-                      <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                        <XCircle className="w-4 h-4 mr-1" />
+                      <p className="text-red-500 text-sm mt-2 flex items-center">
+                        <AlertCircle className="w-4 h-4 mr-1" />
                         {errors.firstName}
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Last Name
                     </label>
-                    <div className="relative">
-                      <User 
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                        style={{ color: 'var(--apple-gray-5)', width: '20px', height: '20px' }}
-                      />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <User className={`w-5 h-5 transition-colors duration-200 ${
+                          formData.lastName ? 'text-purple-500' : 'text-gray-400'
+                        }`} />
+                      </div>
                       <input
                         type="text"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="apple-input"
-                        style={{
-                          paddingLeft: 'var(--apple-space-10)',
-                          borderColor: errors.lastName ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                        }}
+                        className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                          errors.lastName 
+                            ? 'border-red-300 bg-red-50' 
+                            : formData.lastName 
+                              ? 'border-purple-300 bg-purple-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                        }`}
                         placeholder="Last name"
                       />
+                      {formData.lastName && !errors.lastName && (
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        </div>
+                      )}
                     </div>
                     {errors.lastName && (
-                      <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                        <XCircle className="w-4 h-4 mr-1" />
+                      <p className="text-red-500 text-sm mt-2 flex items-center">
+                        <AlertCircle className="w-4 h-4 mr-1" />
                         {errors.lastName}
                       </p>
                     )}
@@ -320,54 +415,72 @@ const Auth = ({ onAuthSuccess }) => {
                 </div>
 
                 {/* Company & Title */}
-                <div className="apple-grid apple-grid-2" style={{ gap: 'var(--apple-space-4)' }}>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Company
                     </label>
-                    <div className="relative">
-                      <Building2 
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                        style={{ color: 'var(--apple-gray-5)', width: '20px', height: '20px' }}
-                      />
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Building2 className={`w-5 h-5 transition-colors duration-200 ${
+                          formData.company ? 'text-purple-500' : 'text-gray-400'
+                        }`} />
+                      </div>
                       <input
                         type="text"
                         name="company"
                         value={formData.company}
                         onChange={handleInputChange}
-                        className="apple-input"
-                        style={{
-                          paddingLeft: 'var(--apple-space-10)',
-                          borderColor: errors.company ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                        }}
+                        className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                          errors.company 
+                            ? 'border-red-300 bg-red-50' 
+                            : formData.company 
+                              ? 'border-purple-300 bg-purple-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                        }`}
                         placeholder="Your company"
                       />
+                      {formData.company && !errors.company && (
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        </div>
+                      )}
                     </div>
                     {errors.company && (
-                      <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                        <XCircle className="w-4 h-4 mr-1" />
+                      <p className="text-red-500 text-sm mt-2 flex items-center">
+                        <AlertCircle className="w-4 h-4 mr-1" />
                         {errors.company}
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Title
                     </label>
-                    <input
-                      type="text"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      className="apple-input"
-                      style={{
-                        borderColor: errors.title ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                      }}
-                      placeholder="CEO, CTO, etc."
-                    />
+                    <div className="relative group">
+                      <input
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleInputChange}
+                        className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                          errors.title 
+                            ? 'border-red-300 bg-red-50' 
+                            : formData.title 
+                              ? 'border-purple-300 bg-purple-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        placeholder="CEO, CTO, etc."
+                      />
+                      {formData.title && !errors.title && (
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        </div>
+                      )}
+                    </div>
                     {errors.title && (
-                      <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                        <XCircle className="w-4 h-4 mr-1" />
+                      <p className="text-red-500 text-sm mt-2 flex items-center">
+                        <AlertCircle className="w-4 h-4 mr-1" />
                         {errors.title}
                       </p>
                     )}
@@ -376,30 +489,38 @@ const Auth = ({ onAuthSuccess }) => {
 
                 {/* Location */}
                 <div>
-                  <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Location
                   </label>
-                  <div className="relative">
-                    <MapPin 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'var(--apple-gray-5)', width: '20px', height: '20px' }}
-                    />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <MapPin className={`w-5 h-5 transition-colors duration-200 ${
+                        formData.location ? 'text-purple-500' : 'text-gray-400'
+                      }`} />
+                    </div>
                     <input
                       type="text"
                       name="location"
                       value={formData.location}
                       onChange={handleInputChange}
-                      className="apple-input"
-                      style={{
-                        paddingLeft: 'var(--apple-space-10)',
-                        borderColor: errors.location ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                      }}
+                      className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                        errors.location 
+                          ? 'border-red-300 bg-red-50' 
+                          : formData.location 
+                            ? 'border-purple-300 bg-purple-50' 
+                            : 'border-gray-200 hover:border-gray-300'
+                      }`}
                       placeholder="City, Country"
                     />
+                    {formData.location && !errors.location && (
+                      <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      </div>
+                    )}
                   </div>
                   {errors.location && (
-                    <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                      <XCircle className="w-4 h-4 mr-1" />
+                    <p className="text-red-500 text-sm mt-2 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" />
                       {errors.location}
                     </p>
                   )}
@@ -407,49 +528,74 @@ const Auth = ({ onAuthSuccess }) => {
 
                 {/* Bio */}
                 <div>
-                  <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Bio
                   </label>
-                  <textarea
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="apple-input"
-                    style={{
-                      resize: 'vertical',
-                      minHeight: '80px'
-                    }}
-                    placeholder="Tell us about yourself..."
-                  />
+                  <div className="relative group">
+                    <textarea
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
+                      rows={3}
+                      className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 resize-vertical ${
+                        errors.bio 
+                          ? 'border-red-300 bg-red-50' 
+                          : formData.bio 
+                            ? 'border-purple-300 bg-purple-50' 
+                            : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      placeholder="Tell us about yourself..."
+                    />
+                    {formData.bio && !errors.bio && (
+                      <div className="absolute top-4 right-4">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      </div>
+                    )}
+                  </div>
+                  {errors.bio && (
+                    <p className="text-red-500 text-sm mt-2 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" />
+                      {errors.bio}
+                    </p>
+                  )}
                 </div>
 
                 {/* Confirm Password */}
                 <div>
-                  <label className="apple-text-callout font-semibold mb-2 block" style={{ color: 'var(--apple-gray-7)' }}>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Confirm Password
                   </label>
-                  <div className="relative">
-                    <Lock 
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                      style={{ color: 'var(--apple-gray-5)', width: '20px', height: '20px' }}
-                    />
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className={`w-5 h-5 transition-colors duration-200 ${
+                        formData.confirmPassword ? 'text-purple-500' : 'text-gray-400'
+                      }`} />
+                    </div>
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? 'text' : 'password'}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="apple-input"
-                      style={{
-                        paddingLeft: 'var(--apple-space-10)',
-                        borderColor: errors.confirmPassword ? 'var(--apple-red)' : 'var(--apple-gray-4)'
-                      }}
+                      className={`w-full pl-12 pr-12 py-4 border-2 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                        errors.confirmPassword 
+                          ? 'border-red-300 bg-red-50' 
+                          : formData.confirmPassword 
+                            ? 'border-purple-300 bg-purple-50' 
+                            : 'border-gray-200 hover:border-gray-300'
+                      }`}
                       placeholder="Confirm your password"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="apple-text-caption mt-1 flex items-center" style={{ color: 'var(--apple-red)' }}>
-                      <XCircle className="w-4 h-4 mr-1" />
+                    <p className="text-red-500 text-sm mt-2 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" />
                       {errors.confirmPassword}
                     </p>
                   )}
@@ -476,40 +622,33 @@ const Auth = ({ onAuthSuccess }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="apple-button apple-button-primary w-full flex items-center justify-center space-x-2"
-              style={{
-                padding: 'var(--apple-space-4) var(--apple-space-6)',
-                borderRadius: 'var(--apple-radius-medium)',
-                fontSize: 'var(--apple-font-size-body)',
-                fontWeight: '600',
-                opacity: isLoading ? 0.6 : 1,
-                cursor: isLoading ? 'not-allowed' : 'pointer'
-              }}
+              className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-100 ${
+                isLoading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl'
+              }`}
             >
               {isLoading ? (
-                <>
-                  <div 
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
-                  ></div>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Processing...</span>
-                </>
+                </div>
               ) : (
-                <>
+                <div className="flex items-center justify-center space-x-2">
                   <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
                   <ArrowRight className="w-5 h-5" />
-                </>
+                </div>
               )}
             </button>
           </form>
 
           {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="apple-text-callout" style={{ color: 'var(--apple-gray-6)' }}>
+          <div className="mt-8 text-center">
+            <p className="text-gray-600">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="font-semibold"
-                style={{ color: 'var(--apple-blue)' }}
+                className="font-semibold text-purple-600 hover:text-purple-700 transition-colors duration-200"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>
@@ -517,6 +656,141 @@ const Auth = ({ onAuthSuccess }) => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForgotPassword(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md relative">
+            <button
+              onClick={() => setShowForgotPassword(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-gradient-to-br from-purple-600 to-pink-600">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password?</h2>
+              <p className="text-gray-600">Enter your email address and we'll send you a link to reset your password.</p>
+            </div>
+
+            <form onSubmit={handleForgotPassword} className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 hover:border-gray-300"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                Send Reset Link
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetPassword && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowResetPassword(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md relative">
+            <button
+              onClick={() => setShowResetPassword(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-gradient-to-br from-purple-600 to-pink-600">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
+              <p className="text-gray-600">Enter your new password below.</p>
+            </div>
+
+            <form onSubmit={handleResetPassword} className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  New Password
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 hover:border-gray-300"
+                    placeholder="Enter new password"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Confirm New Password
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-purple-100 hover:border-gray-300"
+                    placeholder="Confirm new password"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-4 px-6 rounded-xl font-semibold text-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              >
+                Reset Password
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

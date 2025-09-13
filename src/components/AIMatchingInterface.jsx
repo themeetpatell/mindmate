@@ -16,7 +16,58 @@ import {
   Target,
   Users,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  MessageCircle,
+  Phone,
+  Video,
+  Send,
+  ThumbsUp,
+  ThumbsDown,
+  Bookmark,
+  Share2,
+  MoreHorizontal,
+  Clock,
+  TrendingUp,
+  Award,
+  Flame,
+  Diamond,
+  Crown,
+  Shield,
+  Lock,
+  Unlock,
+  Volume2,
+  VolumeX,
+  Camera,
+  Mic,
+  MicOff,
+  Play,
+  Pause,
+  SkipForward,
+  RotateCcw,
+  Maximize2,
+  Minimize2,
+  Info,
+  HelpCircle,
+  Bell,
+  BellOff,
+  Search,
+  Sliders,
+  BarChart3,
+  PieChart,
+  Activity,
+  Target as TargetIcon,
+  Compass,
+  Navigation,
+  Globe,
+  Wifi,
+  WifiOff,
+  Battery,
+  BatteryLow,
+  Signal,
+  SignalZero,
+  SignalLow,
+  SignalMedium,
+  SignalHigh
 } from 'lucide-react';
 
 const AIMatchingInterface = ({
@@ -41,15 +92,65 @@ const AIMatchingInterface = ({
     interests: [],
     verified: false,
     online: false,
-    compatibility: 70
+    compatibility: 70,
+    education: [],
+    profession: [],
+    lifestyle: [],
+    personality: [],
+    relationshipGoals: [],
+    hasPhotos: true,
+    hasBio: true,
+    isVerified: false,
+    isOnline: false,
+    lastActive: 'any', // any, today, week, month
+    height: { min: 0, max: 200 },
+    bodyType: [],
+    ethnicity: [],
+    religion: [],
+    politics: [],
+    smoking: 'any', // any, never, occasionally, regularly
+    drinking: 'any', // any, never, occasionally, regularly
+    exercise: 'any', // any, never, occasionally, regularly
+    diet: [],
+    pets: [],
+    children: 'any', // any, want, have, don't want
+    zodiac: [],
+    languages: []
   });
   const [settings, setSettings] = useState({
     notifications: true,
     autoAdvance: false,
     showDistance: true,
     showLastActive: true,
-    theme: 'light'
+    theme: 'light',
+    soundEffects: true,
+    hapticFeedback: true,
+    autoPlay: false,
+    voiceNotes: true,
+    videoCalls: true,
+    smartSuggestions: true,
+    aiInsights: true,
+    compatibilityAlerts: true,
+    matchReminders: true,
+    privacyMode: false,
+    incognitoMode: false
   });
+  
+  // Enhanced state for advanced features
+  const [viewMode, setViewMode] = useState('card'); // card, grid, list
+  const [isVideoMode, setIsVideoMode] = useState(false);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState(null);
+  const [showInsights, setShowInsights] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showConversationStarters, setShowConversationStarters] = useState(false);
+  const [showDateIdeas, setShowDateIdeas] = useState(false);
+  const [showCompatibilityBreakdown, setShowCompatibilityBreakdown] = useState(false);
+  const [activeTab, setActiveTab] = useState('matches'); // matches, liked, passed, superliked
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('compatibility'); // compatibility, distance, age, activity
   const [stats, setStats] = useState({
     totalMatches: 0,
     likes: 0,

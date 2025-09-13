@@ -10,7 +10,6 @@ import { initializeAnalytics } from './utils/analytics.js';
 const Navbar = lazy(() => import('./components/Navbar.jsx'));
 const Home = lazy(() => import('./components/Home.jsx'));
 const Profile = lazy(() => import('./components/Profile.jsx'));
-const Discovery = lazy(() => import('./components/Discovery.jsx'));
 const Connections = lazy(() => import('./components/Connections.jsx'));
 const Events = lazy(() => import('./components/Events.jsx'));
 const Auth = lazy(() => import('./components/Auth.jsx'));
@@ -19,6 +18,7 @@ const Messages = lazy(() => import('./components/Messages.jsx'));
 const AIMatchingInterface = lazy(() => import('./components/AIMatchingInterface.jsx'));
 const GamificationDashboard = lazy(() => import('./components/GamificationDashboard.jsx'));
 const PremiumFeatures = lazy(() => import('./components/PremiumFeatures.jsx'));
+const LandingPage = lazy(() => import('./components/LandingPage.jsx'));
 
 // Services (keep synchronous for now)
 import { AIPsychologyService } from './services/aiPsychologyService.js';
@@ -32,6 +32,7 @@ const AppContent = () => {
   const [gamificationProfile, setGamificationProfile] = useState(null);
   const [showPremiumFeatures, setShowPremiumFeatures] = useState(false);
   const [showGamification, setShowGamification] = useState(false);
+  const [showApp, setShowApp] = useState(false);
 
   // Initialize performance monitoring and analytics
   useEffect(() => {
@@ -46,6 +47,7 @@ const AppContent = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      setShowApp(true);
       // Initialize user data
       const mockUser = {
         id: 'user_1',
@@ -451,10 +453,25 @@ const AppContent = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Auth onAuthSuccess={() => {}} />;
+  // Show landing page if not authenticated or not showing app
+  if (!isAuthenticated || !showApp) {
+    return (
+      <ErrorBoundary>
+        <Router>
+          <div className="App min-h-screen">
+            <Suspense fallback={<LoadingSpinner size="large" text="Loading..." />}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/auth" element={<Auth onAuthSuccess={() => setShowApp(true)} />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </Router>
+      </ErrorBoundary>
+    );
   }
 
+  // Show app platform only when authenticated and showApp is true
   return (
     <ErrorBoundary>
       <Router>
@@ -466,12 +483,12 @@ const AppContent = () => {
             <Suspense fallback={<LoadingSpinner size="large" text="Loading page..." />}>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/discovery" element={<Discovery />} />
                 <Route path="/connections" element={<Connections />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/pitches" element={<Pitches />} />
-                <Route path="/messages" element={<Messages />} />
+                <Route path="/pitching" element={<Pitches />} />
               <Route 
                 path="/matching" 
                 element={

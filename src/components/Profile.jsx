@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { 
   Edit, 
   Settings, 
@@ -21,10 +23,15 @@ import {
   Phone,
   Instagram,
   Twitter,
-  Linkedin
+  Linkedin,
+  LogOut
 } from 'lucide-react';
+import { logoutUser } from '../store/slices/authSlice.js';
 
 const Profile = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('about');
 
   const [userProfile, setUserProfile] = useState({
@@ -94,6 +101,16 @@ const Profile = () => {
     { id: 'connections', label: 'Connections', count: userProfile.stats.connections }
   ];
 
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <div className="main-content">
       <div className="container">
@@ -155,6 +172,13 @@ const Profile = () => {
                   </button>
                   <button className="btn btn-ghost">
                     <Settings className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className="btn btn-ghost text-red-600 hover:bg-red-50"
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
                   </button>
                 </div>
               </div>
