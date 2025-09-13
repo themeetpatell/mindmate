@@ -1,10 +1,20 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, memo, useMemo, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import { setupGlobalErrorHandlers, PerformanceMonitor } from './utils/errorHandler.js';
 import { initializeAnalytics } from './utils/analytics.js';
+
+// Performance optimizations
+const LoadingFallback = memo(() => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100">
+    <div className="text-center animate-fade-in">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+      <p className="text-gray-600 font-medium">Loading...</p>
+    </div>
+  </div>
+));
 
 // Lazy load components for better performance
 const Navbar = lazy(() => import('./components/Navbar.jsx'));
@@ -459,7 +469,7 @@ const AppContent = () => {
       <ErrorBoundary>
         <Router>
           <div className="App min-h-screen">
-            <Suspense fallback={<LoadingSpinner size="large" text="Loading..." />}>
+            <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<Auth onAuthSuccess={() => setShowApp(true)} />} />
@@ -476,11 +486,11 @@ const AppContent = () => {
     <ErrorBoundary>
       <Router>
         <div className="App min-h-screen" style={{ backgroundColor: 'var(--apple-gray-1)' }}>
-          <Suspense fallback={<LoadingSpinner size="large" text="Loading navigation..." />}>
+          <Suspense fallback={<LoadingFallback />}>
             <Navbar />
           </Suspense>
           <main className="main-content">
-            <Suspense fallback={<LoadingSpinner size="large" text="Loading page..." />}>
+            <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/home" element={<Home />} />

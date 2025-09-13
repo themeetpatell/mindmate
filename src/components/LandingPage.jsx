@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Heart, 
@@ -263,7 +263,7 @@ const LandingPage = () => {
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Find Your
-                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent block">
+                  <span className="text-gradient block">
                     Perfect Match
                   </span>
                   with AI
@@ -375,8 +375,8 @@ const LandingPage = () => {
       {/* Features Section */}
       <section id="features" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <div className="text-center mb-16 animate-fade-in">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 text-gradient">
               Why Choose MindMate?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -387,7 +387,7 @@ const LandingPage = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div key={index} className="card-fluent p-8 hover-lift">
                 <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center text-white mb-6`}>
                   {feature.icon}
                 </div>
@@ -565,14 +565,14 @@ const LandingPage = () => {
             Join thousands of singles who have already found love through MindMate's AI-powered matching.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={handleStartMatching}
-              className="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
-            >
-              <span>Start Your Journey</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300 flex items-center justify-center space-x-2">
+              <button 
+                onClick={handleStartMatching}
+                className="btn-fluent btn-secondary px-8 py-4 text-lg font-semibold hover-scale flex items-center justify-center space-x-2"
+              >
+                <span>Start Your Journey</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            <button className="btn-fluent border-2 border-white text-white px-8 py-4 text-lg font-semibold hover:bg-white hover:text-purple-600 flex items-center justify-center space-x-2">
               <Play className="w-5 h-5" />
               <span>Watch Demo</span>
             </button>

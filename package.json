@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build --config vite.config.prod.js",
     "build:dev": "vite build",
+    "build:analyze": "vite build --mode analyze",
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext js,jsx --fix",
@@ -16,7 +17,10 @@
     "test:coverage": "vitest --coverage",
     "analyze": "npm run build && npx vite-bundle-analyzer dist/stats.html",
     "clean": "rm -rf dist node_modules/.vite",
-    "preview:prod": "npm run build && npm run preview"
+    "preview:prod": "npm run build && npm run preview",
+    "optimize": "npm run clean && npm run build && npm run analyze",
+    "lighthouse": "lighthouse http://localhost:4173 --output html --output-path ./lighthouse-report.html",
+    "perf": "npm run build && npm run preview & sleep 5 && npm run lighthouse"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.3",
